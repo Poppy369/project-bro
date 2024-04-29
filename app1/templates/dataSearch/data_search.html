@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Option Example</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .container {
+        margin: 20px auto;
+        min-width: 400px;
+        text-align: center;
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .container ul li{
+        list-style: none;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    select,
+    input[type="text"],
+    input[type="Submit"] {
+        width: calc(100% - 10px);
+        margin-top: 5px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        box-sizing: border-box; /* Ensures padding and border are included in the width */
+    }
+
+    select:focus,
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #66afe9;
+    }
+
+    select:disabled,
+    input[type="text"]:disabled {
+        background-color: #eee;
+        cursor: not-allowed;
+    }
+
+    #selectOption {
+        margin-bottom: 15px;
+    }
+
+    #idField,
+    #nameField {
+        margin-bottom: 10px;
+    }
+
+    input[type="Submit"] {
+        width: 100%;
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    input[type="Submit"]:hover {
+        background-color: #45a049;
+    }
+ 
+    .result-block {
+        display: grid;
+        grid-template-columns: 1fr ;
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    
+    .result-block li{
+        display: grid;
+        grid-template-columns: 2fr 4fr;
+        padding-bottom :2rem; 
+        padding-top: 2rem;
+        text-align: start;
+        border-bottom: 2px solid;
+
+        
+    }
+    .result-block li:last-of-type{
+        padding-bottom: 5px;
+        border-bottom: none;
+    }
+    .block{
+     /*   text-align: end; */
+        padding-right: 10px;
+        font-weight: bold;
+
+        
+    }
+    .inner-result-block{
+        border: 5px solid black;
+        margin-top: 1rem;
+        padding: 1rem;
+        margin: 20px auto;
+        min-width: 400px;
+        text-align: center;
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <form action="dataForm" method="POST">
+         {% csrf_token %}
+    <div>
+        <label for="selectOption">Select Option:</label>
+        <select id="selectOption" name="selectOption" onchange="selectOptionChanged()">
+            <option value="select" selected>Select a Field</option>
+            <option value="id">Select by ID</option>
+            <option value="name">Select by Name</option>
+        </select>
+    </div>
+    <div>
+        <label for="idField">ID:</label>
+        <select id="idField" name="idField" onchange="enableInput(this)" disabled>
+            <option value="">Select an ID</option>
+            {% for data in datas  %}
+            <option value="{{data.emp_id}}">{{data.emp_id | title}}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="textIdField" id="idTextInput" disabled>
+        
+
+    </div>
+    <div>
+        <label for="nameField">Name:</label>
+        <select id="nameField" name="nameField" onchange="enableInput(this)" disabled>
+            <option value="">Select a Name</option>
+            {% for data in datas  %}
+            <option value="{{data.emp_name}}">{{data.emp_name | title}}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="textNameField" id="nameTextInput" disabled>
+    </div>
+    <input type="Submit" value="Submit">
+</form>
+</div>
+
+<!-- Add this block to display the result -->
+{% if result_data %}
+  
+<div class="container result-container">
+
+    <ul class="result-block">
+        {% for result_data in result_data  %}
+        <div class="inner-result-block">
+        <li><div class=" block">Employee Id </div>:     {{ result_data.emp_id }}</li>
+        <li><div class=" block">Name </div>:    {{ result_data.emp_name | title }}</li>
+        <li><div class=" block">Location </div>:     {{ result_data.location.location_name | title }}</li>
+        <li><div class=" block">Department </div>:      {{result_data.department.department_name | upper }}</li>
+        </div>
+        {% endfor %}
+    </ul>
+
+
+</div>
+
+{% endif %}
+
+<script>
+    function selectOptionChanged() {
+        var selectOption = document.getElementById("selectOption").value;
+        if (selectOption === "id") {
+            document.getElementById("idField").disabled = false;
+            document.getElementById("nameField").disabled = true;
+            if (document.getElementById("idField").value === "") {
+                document.getElementById("idTextInput").disabled = false;
+            } else {
+                document.getElementById("idTextInput").disabled = true;
+            }
+            document.getElementById("nameTextInput").disabled = true;
+        } else if (selectOption === "name") {
+            document.getElementById("idField").disabled = true;
+            document.getElementById("nameField").disabled = false;
+            document.getElementById("idTextInput").disabled = true;
+            if (document.getElementById("nameField").value === "") {
+                document.getElementById("nameTextInput").disabled = false;
+            } else {
+                document.getElementById("nameTextInput").disabled = true;
+            }
+        } else if (selectOption === "select") {
+            document.getElementById("idField").disabled = true;
+            document.getElementById("nameField").disabled = true;
+            document.getElementById("idTextInput").disabled = true;
+            document.getElementById("nameTextInput").disabled = true;
+        }
+    }
+
+    function enableInput(selectElement) {
+        var correspondingInput = selectElement.nextElementSibling;
+        if (selectElement.value === "") {
+            correspondingInput.disabled = false;
+        } else {
+            correspondingInput.disabled = true;
+        }
+    }
+</script>
+
+</body>
+</html>
